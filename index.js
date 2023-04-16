@@ -214,7 +214,7 @@ require("core-js/actual/array/group-by");
                     + "(SELECT TEAMS.ID, COUNT(*) as LOSSES, SUM(ABS(T1_SCORE - T2_SCORE)) * -1 as PD FROM TEAMS "
                     + "JOIN GAMES ON (TEAMS.ID = GAMES.T1 OR TEAMS.ID = GAMES.T2) AND WINNER IS NOT NULL AND WINNER != TEAMS.ID "
                     + "GROUP BY TEAMS.ID) as losses ON TEAMS.ID = losses.ID "
-                + "ORDER BY WP DESC, PD DESC;"
+                + "ORDER BY WP DESC, WINS DESC, PD DESC;"
             
             connection.query(sqlquery, function (err, result, fields) {
                 if (err) {

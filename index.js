@@ -202,19 +202,32 @@ require("core-js/actual/array/group-by");
                 return;
             }
             
-            const sqlquery =
-                "SELECT TEAMS.ID as ID, P1, P2, CONFERENCE, TNAME, ifnull(WINS, 0) as WINS, ifnull(LOSSES, 0) as LOSSES, " 
-                + "ifnull(ifnull(WINS, 0) / (ifnull(WINS, 0) + ifnull(LOSSES, 0)), 0.0) as WP, ifnull(wins.PD,0) + ifnull(losses.PD,0) as PD FROM "
-                + "TEAMS "
-                + "LEFT JOIN "
-                    + "(SELECT TEAMS.ID, COUNT(*) as WINS, SUM(ABS(T1_SCORE - T2_SCORE)) as PD FROM TEAMS "
-                    + "JOIN GAMES ON (TEAMS.ID = GAMES.T1 OR TEAMS.ID = GAMES.T2) AND TEAMS.ID = GAMES.WINNER "
-                    + "GROUP BY TEAMS.ID) as wins ON TEAMS.ID = wins.ID "
-                + "LEFT JOIN "
-                    + "(SELECT TEAMS.ID, COUNT(*) as LOSSES, SUM(ABS(T1_SCORE - T2_SCORE)) * -1 as PD FROM TEAMS "
-                    + "JOIN GAMES ON (TEAMS.ID = GAMES.T1 OR TEAMS.ID = GAMES.T2) AND WINNER IS NOT NULL AND WINNER != TEAMS.ID "
-                    + "GROUP BY TEAMS.ID) as losses ON TEAMS.ID = losses.ID "
-                + "ORDER BY WP DESC, WINS DESC, PD DESC;"
+            // const sqlquery =
+            //     SELECT TEAMS.ID as ID, P1, P2, CONFERENCE, TNAME, ifnull(WINS, 0) as WINS, ifnull(LOSSES, 0) + (12 - (ifnull(WINS, 0) + ifnull(LOSSES, 0))) as LOSSES, 
+            //     ifnull(ifnull(WINS, 0) / 12.0, 0.0) as WP, ifnull(wins.PD,0) + ifnull(losses.PD,0) as PD FROM 
+            //     TEAMS 
+            //     LEFT JOIN 
+            //         (SELECT TEAMS.ID, COUNT(*) as WINS, SUM(ABS(T1_SCORE - T2_SCORE)) as PD FROM TEAMS 
+            //         JOIN GAMES ON (TEAMS.ID = GAMES.T1 OR TEAMS.ID = GAMES.T2) AND TEAMS.ID = GAMES.WINNER 
+            //         GROUP BY TEAMS.ID) as wins ON TEAMS.ID = wins.ID 
+            //     LEFT JOIN 
+            //         (SELECT TEAMS.ID, COUNT(*) as LOSSES, SUM(ABS(T1_SCORE - T2_SCORE)) * -1 as PD FROM TEAMS 
+            //         JOIN GAMES ON (TEAMS.ID = GAMES.T1 OR TEAMS.ID = GAMES.T2) AND WINNER IS NOT NULL AND WINNER != TEAMS.ID 
+            //         GROUP BY TEAMS.ID) as losses ON TEAMS.ID = losses.ID 
+            //     ORDER BY WP DESC, WINS DESC, PD DESC;
+
+            const sqlquery = "SELECT TEAMS.ID as ID, P1, P2, CONFERENCE, TNAME, ifnull(WINS, 0) as WINS, ifnull(LOSSES, 0) + (12 - (ifnull(WINS, 0) + ifnull(LOSSES, 0))) as LOSSES, " +
+            "	ifnull(ifnull(WINS, 0) / 12.0, 0.0) as WP, ifnull(wins.PD,0) + ifnull(losses.PD,0) as PD FROM " +
+            "	TEAMS " +
+            "	LEFT JOIN " +
+            "		(SELECT TEAMS.ID, COUNT(*) as WINS, SUM(ABS(T1_SCORE - T2_SCORE)) as PD FROM TEAMS " +
+            "		JOIN GAMES ON (TEAMS.ID = GAMES.T1 OR TEAMS.ID = GAMES.T2) AND TEAMS.ID = GAMES.WINNER " +
+            "		GROUP BY TEAMS.ID) as wins ON TEAMS.ID = wins.ID " +
+            "	LEFT JOIN " +
+            "		(SELECT TEAMS.ID, COUNT(*) as LOSSES, SUM(ABS(T1_SCORE - T2_SCORE)) * -1 as PD FROM TEAMS " +
+            "		JOIN GAMES ON (TEAMS.ID = GAMES.T1 OR TEAMS.ID = GAMES.T2) AND WINNER IS NOT NULL AND WINNER != TEAMS.ID " +
+            "		GROUP BY TEAMS.ID) as losses ON TEAMS.ID = losses.ID " +
+            "	ORDER BY WP DESC, WINS DESC, PD DESC;";
             
             connection.query(sqlquery, function (err, result, fields) {
                 if (err) {
